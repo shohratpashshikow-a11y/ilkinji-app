@@ -19,6 +19,9 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
+    - name: Android SDK sazlamak
+      uses: android-actions/setup-android@v3
+
     - name: Node.js gurnamak
       uses: actions/setup-node@v4
       with:
@@ -29,15 +32,10 @@ jobs:
 
     - name: Cordova proýektini awtomatiki döretmek
       run: |
-        # Создаем чистый проект Cordova во временной папке
-        cordova create my_tmp_app com.taslama.synagapp "Synag App"
-        
-        # Переносим ваши файлы (index.html, style.css, script.js) в папку www нового проекта
+        cordova create my_tmp_app com.taslama.synagapp "SynagApp"
         cp index.html my_tmp_app/www/
         cp style.css my_tmp_app/www/
         cp script.js my_tmp_app/www/
-        
-        # Переносим конфигурацию, если она есть
         cp config.xml my_tmp_app/config.xml || true
 
     - name: Android Platformasyny goşmak we APK Gurmak
