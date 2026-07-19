@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget id="com.taslama.synagapp" version="1.0.0" xmlns="http://w3.org">
+    <name>Synag App</name>
+    <description>JavaScript bilen taýýarlanan ilkinji synag programmam.</description>
+    <author email="admin@mysite.com">Pashshikow Shohrat</author>
+    <content src="index.html" />
+    <preference name="Orientation" value="portrait" />
+</widget>
