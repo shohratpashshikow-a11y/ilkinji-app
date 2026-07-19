@@ -1,0 +1,27 @@
+name: APK-ny Mugt Döretmek
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Koduňyzy barlamak
+      uses: actions/checkout@v4
+
+    - name: Node.js gurnamak
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Cordova gurnamak
+      run: npm install -g cordova
+
+    - name: Android Platformasyny goşmak
+      run: |
+        cordova platform add android
+        cordova build android --no-telemetry
