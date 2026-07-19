@@ -19,25 +19,36 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Android SDK sazlamak
-      uses: android-actions/setup-android@v3
-
-    - name: Node.js gurnamak (Häzirki zaman wersiýasy)
+    - name: Node.js gurnamak
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
 
     - name: Cordova gurnamak
       run: npm install -g cordova
 
+    - name: Cordova proýektini awtomatiki döretmek
+      run: |
+        # Создаем чистый проект Cordova во временной папке
+        cordova create my_tmp_app com.taslama.synagapp "Synag App"
+        
+        # Переносим ваши файлы (index.html, style.css, script.js) в папку www нового проекта
+        cp index.html my_tmp_app/www/
+        cp style.css my_tmp_app/www/
+        cp script.js my_tmp_app/www/
+        
+        # Переносим конфигурацию, если она есть
+        cp config.xml my_tmp_app/config.xml || true
+
     - name: Android Platformasyny goşmak we APK Gurmak
       run: |
+        cd my_tmp_app
         cordova platform add android
-        cordova build android --release --no-telemetry
+        cordova build android --debug --no-telemetry
 
-    - name: APK Faýlyny Ýüklemek (Göçürip almak üçin)
+    - name: APK Faýlyny Ýüklemek
       uses: actions/upload-artifact@v4
       with:
         name: MeniňAndroidProgrammam
-        path: platforms/android/app/build/outputs/apk/release/*.apk
-      
+        path: my_tmp_app/platforms/android/app/build/outputs/apk/debug/*.apk
+        
