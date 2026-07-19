@@ -13,15 +13,31 @@ jobs:
     - name: Koduňyzy barlamak
       uses: actions/checkout@v4
 
-    - name: Node.js gurnamak
+    - name: Java JDK 17 gurnamak
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Android SDK sazlamak
+      uses: android-actions/setup-android@v3
+
+    - name: Node.js gurnamak (Häzirki zaman wersiýasy)
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 20
 
     - name: Cordova gurnamak
       run: npm install -g cordova
 
-    - name: Android Platformasyny goşmak
+    - name: Android Platformasyny goşmak we APK Gurmak
       run: |
         cordova platform add android
-        cordova build android --no-telemetry
+        cordova build android --release --no-telemetry
+
+    - name: APK Faýlyny Ýüklemek (Göçürip almak üçin)
+      uses: actions/upload-artifact@v4
+      with:
+        name: MeniňAndroidProgrammam
+        path: platforms/android/app/build/outputs/apk/release/*.apk
+      
