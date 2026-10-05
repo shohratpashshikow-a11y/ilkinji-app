@@ -24,8 +24,16 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
+    # Android SDK sazlamak üçin has durnukly gural
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        log-accepted-android-sdk-licenses: false
+
+    # Android lisenziýalaryny awtomatiki kabul etmek (Iň köp ýalňyşlyk berýän ýeri)
+    - name: Accept Android Licenses
+      run: |
+        yes | sdkmanager --licenses || true
 
     - name: Install Cordova and Dependencies
       run: |
@@ -35,7 +43,7 @@ jobs:
     - name: Create Cordova Project Components
       run: |
         mkdir -p www
-        # Eger index.html we questions.js eýýäm bar bolsa, bular www papkasyna geçiriler
+        # Eger index.html we questions.js bar bolsa, bular www papkasyna geçiriler
         cp index.html www/ || true
         cp questions.js www/ || true
         # Cordova platformasyny goşmak
