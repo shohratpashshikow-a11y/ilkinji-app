@@ -24,17 +24,19 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    # Android SDK sazlamak üçin has durnukly gural
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        log-accepted-android-sdk-licenses: false
+    # GitHub-yň öz içindäki taýyn Android SDK-ny taslama birikdirmek
+    - name: Set up Android Environment Variables
+      run: |
+        echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
 
-    # Android lisenziýalaryny awtomatiki kabul etmek (Iň köp ýalňyşlyk berýän ýeri)
+    # Ähli Android lisenziýalaryny awtomatiki tassyklamak
     - name: Accept Android Licenses
       run: |
-        yes | sdkmanager --licenses || true
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
+    # Cordova we beýleki kitaphanalary gurnamak
     - name: Install Cordova and Dependencies
       run: |
         npm install -g cordova
@@ -43,10 +45,8 @@ jobs:
     - name: Create Cordova Project Components
       run: |
         mkdir -p www
-        # Eger index.html we questions.js bar bolsa, bular www papkasyna geçiriler
         cp index.html www/ || true
         cp questions.js www/ || true
-        # Cordova platformasyny goşmak
         cordova platform add android
 
     - name: Build Android APK
