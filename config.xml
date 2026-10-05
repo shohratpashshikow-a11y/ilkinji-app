@@ -1,8 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<widget id="com.taslama.synagapp" version="1.0.0" xmlns="http://w3.org">
-    <name>Synag App</name>
-    <description>JavaScript bilen taýýarlanan ilkinji synag programmam.</description>
-    <author email="admin@mysite.com">Pashshikow Shohrat</author>
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.psihologiya.kwiz" version="1.0.0" xmlns="http://w3.org" xmlns:cdv="http://apache.org">
+    <name>Psihologiya Kwiz</name>
+    <description>Psihologiya degisli 30 sany test oyny</description>
+    <author email="info@mysite.com">Programmer</author>
     <content src="index.html" />
-    <preference name="Orientation" value="portrait" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    
+    <!-- Ikonka suradyny su yerde kesgitleyaris -->
+    <icon src="icon.png" />
+    
+    <preference name="KeepRunning" value="true" />
 </widget>
