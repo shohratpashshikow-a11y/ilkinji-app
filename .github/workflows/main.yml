@@ -24,7 +24,7 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    # Gradle wersiýasyny Java 17 we Cordova bilen doly utgaşykly bolar ýaly 8.7-ä sabitleýäris
+    # Gradle wersiýasyny 8.7-ä sabitlemek
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
@@ -42,6 +42,11 @@ jobs:
       run: |
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
+    # Taslama gerek bolan anyk Build Tools 33.0.2 wersiýasyny ýüklemek (Täze goşulan ädim)
+    - name: Install Required Android Build Tools
+      run: |
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33"
+
     # Cordova we garaşlylyklary gurnamak
     - name: Install Cordova and Dependencies
       run: |
@@ -56,7 +61,7 @@ jobs:
         cp questions.js www/ || true
         cordova platform add android
 
-    # APK Gurmak (Ýalňyşlyk beren ädim - Gradle sazlamasyndan soň bärsi düzelmeli)
+    # APK Gurmak
     - name: Build Android APK
       run: |
         cordova build android --release --no-telemetry
