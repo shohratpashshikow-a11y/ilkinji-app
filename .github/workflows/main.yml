@@ -1,8 +1,8 @@
-name: APK-ny Mugt Döretmek
+name: Build Android APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
@@ -10,43 +10,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Koduňyzy barlamak
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Java JDK 17 gurnamak
+    - name: Set up NodeJS
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Android SDK sazlamak
+    - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
-    - name: Node.js gurnamak
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-
-    - name: Cordova gurnamak
-      run: npm install -g cordova
-
-    - name: Cordova proýektini awtomatiki döretmek
+    - name: Install Cordova and Dependencies
       run: |
-        cordova create my_tmp_app com.taslama.synagapp "psihologia"
-        cp index.html my_tmp_app/www/
-        cp style.css my_tmp_app/www/
-        cp script.js my_tmp_app/www/
-        cp config.xml my_tmp_app/config.xml || true
+        npm install -g cordova
+        npm install
 
-    - name: Android Platformasyny goşmak we APK Gurmak
+    - name: Create Cordova Project Components
       run: |
-        cd my_tmp_app
+        mkdir -p www
+        # Eger index.html we questions.js eýýäm bar bolsa, bular www papkasyna geçiriler
+        cp index.html www/ || true
+        cp questions.js www/ || true
+        # Cordova platformasyny goşmak
         cordova platform add android
-        cordova build android --debug --no-telemetry
 
-    - name: APK Faýlyny Ýüklemek
+    - name: Build Android APK
+      run: |
+        cordova build android --release --no-telemetry
+
+    - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: psihologiadanbarlagnama
-        path: my_tmp_app/platforms/android/app/build/outputs/apk/debug/*.apk
+        name: psychology-quiz-apk
+        path: platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
         
