@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psihologiýa Oýny</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-content: center;
+            min-height: 100vh;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+        }
+        h2 {
+            color: #1a73e8;
+            margin-top: 0;
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #1a73e8;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #dadce0;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover {
+            background-color: #f1f3f4;
+            border-color: #bdc1c6;
+        }
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .option-btn.wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .result-screen {
+            text-align: center;
+        }
+        .score-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+            margin: 20px 0;
+        }
+        .restart-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .restart-btn:hover {
+            background-color: #1557b0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container" id="quiz-box">
+    <div id="game-section">
+        <div class="progress-bar">
+            <div class="progress" id="progress-fill"></div>
+        </div>
+        <p id="question-number" style="color: #666; font-size: 14px;"></p>
+        <div class="question-text" id="question-el">Sorag ýüklenýär...</div>
+        <div class="options-list" id="options-box"></div>
+    </div>
+    
+    <div id="result-section" class="result-screen" style="display: none;">
+        <h2>Oýun Tamamlandy!</h2>
+        <p class="score-text" id="final-score"></p>
+        <p id="feedback-text"></p>
+        <button class="restart-btn" onclick="restartGame()">Tazeden başla</button>
+    </div>
+</div>
+
+<!-- Soraglar aýratyn faýldan goşulýar -->
+<script src="questions.js"></script>
+
+<script>
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let canAnswer = true;
+
+    function initGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        document.getElementById('game-section').style.display = 'block';
+        document.getElementById('result-section').style.display = 'none';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        canAnswer = true;
+        const currentQuestion = quizQuestions[currentQuestionIndex];
+        
+        // Progress bar we sany
+        const progressPercent = ((currentQuestionIndex) / quizQuestions.length) * 100;
+        document.getElementById('progress-fill').style.width = progressPercent + '%';
+        document.getElementById('question-number').innerText = `Sorag: ${currentQuestionIndex + 1} / ${quizQuestions.length}`;
+        
+        // Sorag teksti
+        document.getElementById('question-el').innerText = currentQuestion.question;
+        
+        // Jogaplar
+        const optionsBox = document.getElementById('options-box');
+        optionsBox.innerHTML = '';
+        
+        currentQuestion.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'option-btn';
+            button.innerText = option;
+            button.onclick = () => selectOption(index, button);
+            optionsBox.appendChild(button);
+        });
+    }
+
+    function selectOption(selectedIndex, clickedButton) {
+        if (!canAnswer) return;
+        canAnswer = false;
+        
+        const currentQuestion = quizQuestions[currentQuestionIndex];
+        const correctIndex = currentQuestion.answer;
+        const optionsBox = document.getElementById('options-box');
+        const buttons = optionsBox.getElementsByClassName('option-btn');
+        
+        if (selectedIndex === correctIndex) {
+            clickedButton.classList.add('correct');
+            score++;
+        } else {
+            clickedButton.classList.add('wrong');
+            buttons[correctIndex].classList.add('correct'); // Dogry jogaby hem görkez
+        }
+        
+        setTimeout(() => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizQuestions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }, 1500); // 1.5 sekuntdan soň indiki soraga geçýär
+    }
+
+    function showResults() {
+        document.getElementById('game-section').style.display = 'none';
+        document.getElementById('result-section').style.display = 'block';
+        
+        document.getElementById('final-score').innerText = `Netije: ${score} / ${quizQuestions.length}`;
+        
+        let feedback = "";
+        const percent = (score / quizQuestions.length) * 100;
+        if (percent === 100) feedback = "Gaty gowy! Hemme soraga dogry jogap berdiňiz! 🌟";
+        else if (percent >= 70) feedback = "Gowy netije! Psihologiýa boýunça bilimiňiz ýokary. 👍";
+        else feedback = "Erbet däl, ýöne maglumatlary azajyk gaýtalamak peýdaly bolar. 📚";
+        
+        document.getElementById('feedback-text').innerText = feedback;
+    }
+
+    function restartGame() {
+        initGame();
+    }
+
+    // Sahypa açylanda oýny başlatmak (efirde questions.js bar diýip çykarys)
+    window.onload = initGame;
+</script>
+</body>
+</html>
