@@ -32,7 +32,7 @@ jobs:
 
     - name: Cordova proýektini awtomatiki döretmek
       run: |
-        cordova create my_tmp_app com.taslama.synagapp "SynagApp"
+        cordova create my_tmp_app com.taslama.synagapp "psihologia"
         cp index.html my_tmp_app/www/
         cp style.css my_tmp_app/www/
         cp script.js my_tmp_app/www/
@@ -47,6 +47,6 @@ jobs:
     - name: APK Faýlyny Ýüklemek
       uses: actions/upload-artifact@v4
       with:
-        name: MeniňAndroidProgrammam
+        name: psihologiadanbarlagnama
         path: my_tmp_app/platforms/android/app/build/outputs/apk/debug/*.apk
         
