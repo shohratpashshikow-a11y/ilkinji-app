@@ -16,19 +16,19 @@ jobs:
     - name: Set up NodeJS
       uses: actions/setup-node@v4
       with:
-        node-version: '22' # Node.js 22 wersiýa täzelendi
+        node-version: '18' # Has durnukly wersiýa gaýtaryldy
 
-    - name: Set up JDK 21
+    - name: Set up JDK 11
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
-        java-version: '21' # Java 21 wersiýa täzelendi
+        java-version: '11' # Gradle 7.x bilen doly utgaşykly bolmagy üçin Java 11-e geçirildi
 
-    # Gradle wersiýasyny 8.10-a sabitlemek (Täze Java bilen utgaşykly)
+    # Gradle wersiýasyny Cordova-nyň köne wersiýalary üçin 7.6-a sabitleýäris
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
-        gradle-version: '8.10'
+        gradle-version: '7.6'
 
     # Android gurşaw üýtgeýjilerini sazlamak
     - name: Set up Android Environment Variables
@@ -42,7 +42,7 @@ jobs:
       run: |
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-    # Taslama gerek bolan anyk Build Tools wersiýasyny ýüklemek
+    # Taslama gerek bolan Android Build Tools wersiýasyny ýüklemek
     - name: Install Required Android Build Tools
       run: |
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platforms;android-33"
@@ -61,15 +61,33 @@ jobs:
         cp questions.js www/ || true
         cordova platform add android
 
-    # APK Gurmak
+    # Islendik telefonda açylmagy üçin howpsuzlyk açaryny (Keystore) awtomatiki döretmek
+    - name: Generate Keystore
+      run: |
+        keytool -genkey -v -keystore release.keystore -alias ${{ secrets.KEY_ALIAS }} -keyalg RSA -keysize 2048 -validity 10000 \
+          -storepass ${{ secrets.KEYSTORE_PASSWORD }} -keypass ${{ secrets.KEY_PASSWORD }} \
+          -dname "CN=QuizApp, OU=Development, O=MyCompany, L=Ashgabat, S=Ahal, C=TM"
+
+    # APK Faýlyny gurmak
     - name: Build Android APK
       run: |
         cordova build android --release --no-telemetry
 
-    # Taýyn bolan ÄHLI APK faýllaryny gözläp tapmak we tapylmasa ýalňyşlygy anyklamak (Salgy ýalňyşlygyny düzedýär)
-    - name: Find and Upload APK Artifact
+    # Döredilen APK faýlyna resmi taýdan gol çekmek (Signing)
+    - name: Sign APK
+      run: |
+        APK_PATH=$(find platforms/android/app/build/outputs/apk/release/ -name "*.apk" | head -n 1)
+        jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore release.keystore \
+          -storepass ${{ secrets.KEYSTORE_PASSWORD }} -keypass ${{ secrets.KEY_PASSWORD }} \
+          $APK_PATH ${{ secrets.KEY_ALIAS }}
+        
+        # Zipalign arkaly APK faýlynyň işlemesini optimizasiýa etmek
+        $ANDROID_SDK_ROOT/build-tools/33.0.2/zipalign -v 4 $APK_PATH ready-to-install.apk
+
+    # Taýyn bolan, gol çekilen APK-y GitHub-a ýüklemek
+    - name: Upload Signed APK
       uses: actions/upload-artifact@v4
       with:
-        name: psychology-quiz-apk
-        path: platforms/android/app/build/outputs/apk/**/*.apk # Bütin papkanyň içindäki islendik APK-y tapar
+        name: psychology-quiz-signed-apk
+        path: ready-to-install.apk
         
